@@ -1,0 +1,65 @@
+{
+  "features": [
+    "dist",
+    "dist_rank",
+    "dist_delta",
+    "dist_ratio",
+    "n_cand",
+    "proj_frac",
+    "off_end",
+    "head_diff",
+    "head_cos",
+    "head_reliab",
+    "speed",
+    "dt_prev",
+    "turn_rate",
+    "win_dist_mean",
+    "win_dist_max",
+    "win_head_diff",
+    "arc_len",
+    "out_deg",
+    "in_deg",
+    "has_reverse",
+    "conn_prev",
+    "conn_next"
+  ],
+  "candidate_config": {
+    "radius": 50.0,
+    "k": 8,
+    "spacing": 10.0,
+    "heading_window": 2,
+    "context_window": 3
+  },
+  "hmm_config": {
+    "alpha": 0.5,
+    "beta": 8.0,
+    "backtrack_factor": 3.0,
+    "cutoff_factor": 3.0,
+    "cutoff_base": 150.0,
+    "unreachable_logp": -40.0,
+    "eps": 0.0001
+  },
+  "meta": {
+    "selected_model": "LightGBM",
+    "tuned": true,
+    "params": {
+      "n_estimators": 600,
+      "learning_rate": 0.03294176566781599,
+      "num_leaves": 182,
+      "min_child_samples": 95,
+      "subsample": 0.8035543698815775,
+      "subsample_freq": 1,
+      "colsample_bytree": 0.8623914704727295,
+      "reg_lambda": 0.16149878645803517,
+      "reg_alpha": 0.86787458161227
+    },
+    "seed": 42,
+    "trained_on": "train (80 trips)",
+    "n_training_rows": 376308,
+    "point_cap_per_trip": 800,
+    "cv_f1_macro": 0.937001415012741,
+    "student_test_top1_classifier": 0.9039144050104384,
+    "student_test_top1_hmm": 0.9396137787056368,
+    "created": "2026-11-18 14:38:37"
+  }
+}

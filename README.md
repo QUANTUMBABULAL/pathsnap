@@ -85,4 +85,46 @@ predicted route and the snapped points, with the metrics and latency breakdown o
 
 ## Results
 
-RESULTS_PLACEHOLDER
+All numbers below come from `models/results/*.csv`, written by the executed notebook.
+
+### Model comparison (5-fold GroupKFold on 80 training trips; student-test = 10 held-out trips)
+
+| Model | Family | CV macro-F1 | CV Top-1 | Student-test Top-1 | Student-test macro-F1 | Student-test log loss | Continuity (classifier only) | Inference (ms / 1k cand.) |
+|---|---|---|---|---|---|---|---|---|
+| **LightGBM** | Gradient boosting | **0.9362 ± 0.012** | **0.9003** | **0.9060** | **0.9356** | **0.0845** | **0.806** | 3.2 |
+| Random Forest | Bagging | 0.9356 ± 0.013 | 0.8964 | 0.8839 | 0.9298 | 0.0902 | 0.788 | 2.2 |
+| MLP (64-32) | Neural network | 0.9317 ± 0.013 | 0.8952 | 0.8971 | 0.9338 | 0.0915 | 0.802 | 0.3 |
+| KNN (k=25) | Instance-based | 0.9184 ± 0.014 | 0.8780 | 0.8683 | 0.9135 | 0.1496 | 0.775 | 78.7 |
+| Logistic Regression | Linear | 0.9082 ± 0.008 | 0.8868 | 0.8705 | 0.9061 | 0.1320 | 0.746 | 0.1 |
+
+The selected model is **LightGBM**. It has the best CV macro-F1, which is the primary metric, and the best log loss, which matters because its probabilities become the HMM emissions.
+
+### Bayesian optimisation (Optuna TPE, 30 trials, 3-fold group CV, objective = macro-F1)
+
+| | Untuned | Tuned |
+|---|---|---|
+| CV macro-F1 | 0.9362 | **0.9370** |
+| CV Top-1 | 0.9003 | 0.9010 |
+| Student-test Top-1 | 0.9060 | 0.9039 |
+| Student-test macro-F1 | 0.9356 | 0.9361 |
+| Inference ms / 1k | 3.4 | 10.4 |
+
+Tuning improved CV only marginally (the default configuration was already close to optimal) and roughly tripled inference
+cost. Best parameters: 600 trees, learning rate 0.033, 182 leaves, min_child_samples 95.
+
+### Feature-group ablation (3-fold group CV Top-1, LightGBM)
+
+All features 0.904 · without directional 0.679 · without relative-geometry 0.855 · without context window 0.890 ·
+without topology 0.897 · without kinematic 0.903 · distance only 0.572
+
+### HMM / Viterbi (student-test, 19,160 GPS points)
+
+| | Classifier only | Classifier + HMM |
+|---|---|---|
+| Observation Top-1 | 0.9039 | **0.9396** |
+| Continuity of consecutive matches | 0.806 | **0.909** |
+| Route F1 (length-weighted) | 0.852 | **0.976** |
+| Reconstructed route continuity | – | 0.999 |
+
+HMM decoding improved Top-1 on all 10 student-test trips. Decoder parameters (α = 0.5, β = 8) were chosen on training trips
+using out-of-fold emissions.
